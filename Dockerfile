@@ -43,6 +43,18 @@ RUN wget http://prdownloads.sourceforge.net/netatalk/netatalk-${netatalk_version
 		--default \
 		--fstrans=no
 
+# grab gosu for easy step-down from root
+ENV GOSU_VERSION 1.7
+RUN set -x \
+	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+	&& export GNUPGHOME="$(mktemp -d)" \
+	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+	&& chmod +x /usr/local/bin/gosu \
+	&& gosu nobody true
+
 # Add default user and group
 RUN  mkdir -p /timemachine
 
@@ -51,9 +63,6 @@ RUN touch /var/log/afpd.log
 
 ADD start_services.sh /start_services.sh
 RUN update-rc.d netatalk defaults
-RUN groupadd -o --gid 50675  shares
-RUN useradd --shell /bin/bash -o --uid 50675 --gid 50675 -m shares
-USER shares
 
 EXPOSE 548 636
 

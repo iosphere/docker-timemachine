@@ -4,6 +4,11 @@ set -e
 
 # Need to initialize?
 if [ ! -e /.initialized ]; then
+    if [ -z $AFP_UID ]; then
+        echo "no AFP_UID specified!"
+        exit 1
+    fi
+
     if [ -z $AFP_LOGIN ]; then
         echo "no AFP_LOGIN specified!"
         exit 1
@@ -20,7 +25,7 @@ if [ ! -e /.initialized ]; then
     fi
 
     # Add the user
-    useradd $AFP_LOGIN -M
+    useradd $AFP_LOGIN -M --non-unique --uid $AFP_UID --user-group
     echo $AFP_LOGIN:$AFP_PASSWORD | chpasswd
 
     echo "[Global]
@@ -43,7 +48,7 @@ if [ ! -e /.initialized ]; then
 fi
 
 # Initiate the timemachine daemons
-chown -R $AFP_LOGIN:$AFP_LOGIN /timemachine
+#chown -R $AFP_LOGIN:$AFP_LOGIN /timemachine
 
 # Clean out old locks
 /bin/rm -f /var/lock/netatalk
