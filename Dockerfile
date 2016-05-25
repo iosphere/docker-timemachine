@@ -51,6 +51,9 @@ RUN touch /var/log/afpd.log
 
 ADD start_services.sh /start_services.sh
 RUN update-rc.d netatalk defaults
+RUN groupadd -o --gid 50675  shares
+RUN useradd --shell /bin/bash -o --uid 50675 --gid 50675 -m shares
+USER shares
 
 EXPOSE 548 636
 
